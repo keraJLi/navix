@@ -1,13 +1,15 @@
-from dataclasses import asdict, dataclass, field
 import time
+from dataclasses import asdict, dataclass, field
+
 import jax
-import tyro
-import numpy as np
 import jax.numpy as jnp
+import numpy as np
+import tyro
 import wandb
+
 import navix as nx
 from navix import observations
-from navix.agents import PPO, PPOHparams, ActorCritic
+from navix.agents import PPO, ActorCritic, PPOHparams
 from navix.environments.environment import Environment
 
 # set persistent compilation cache directory
@@ -66,7 +68,7 @@ if __name__ == "__main__":
     print("Logging final results to wandb...")
     start_time = time.time()
     # average over seeds
-    logs_avg = jax.tree.map(lambda x: x.mean(axis=0), logs)
+    logs_avg = jax.tree_util.tree_map(lambda x: x.mean(axis=0), logs)
     config = {**vars(experiment), **asdict(agent.hparams)}
     wandb.init(project=experiment.name, config=config, group=experiment.group)
     agent.log_on_train_end(logs_avg)

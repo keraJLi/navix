@@ -1,5 +1,5 @@
-from dataclasses import asdict, replace, fields
 import time
+from dataclasses import asdict, fields, replace
 from typing import Dict, Tuple
 
 import distrax
@@ -7,6 +7,7 @@ import jax
 import jax.numpy as jnp
 import wandb
 import wandb.util
+
 from navix.agents.agent import Agent
 from navix.environments.environment import Environment
 
@@ -84,7 +85,7 @@ class Experiment:
                 config.update(seed=seed)
                 wandb.init(project=self.name, config=config, group=self.group)
                 print("Logging results for seed:", seed)
-                log = jax.tree.map(lambda x: x[seed], logs)
+                log = jax.tree_util.tree_map(lambda x: x[seed], logs)
                 self.agent.log_on_train_end(log)
                 wandb.finish()
             logging_time = time.time() - start_time
@@ -143,7 +144,7 @@ class Experiment:
             search_set.append(hparams)
         # transpose search set
         len_search_set = len(search_set)
-        search_set = jax.tree.map(lambda *x: jnp.stack(x), *search_set)
+        search_set = jax.tree_util.tree_map(lambda *x: jnp.stack(x), *search_set)
 
         rngs = jnp.asarray([jax.random.PRNGKey(seed) for seed in self.seeds])
 

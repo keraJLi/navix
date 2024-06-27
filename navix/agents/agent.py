@@ -1,11 +1,11 @@
-from dataclasses import dataclass
 import time
+from dataclasses import dataclass
 from typing import Dict, Tuple
 
-import numpy as np
-import wandb
 import jax
 import jax.numpy as jnp
+import numpy as np
+import wandb
 from flax import struct
 from flax.training.train_state import TrainState
 
@@ -58,8 +58,8 @@ class Agent(struct.PyTreeNode):
         wandb.log(logs, step=step)
 
     def log_on_train_end(self, logs):
-        print(jax.tree.map(lambda x: x.shape, logs))
+        print(jax.tree_util.tree_map(lambda x: x.shape, logs))
         len_logs = len(logs["iter/updates"])
         for step in range(len_logs):
-            step_logs = {k: jax.tree.map(lambda x: x[step], v) for k, v in logs.items()}
+            step_logs = {k: jax.tree_util.tree_map(lambda x: x[step], v) for k, v in logs.items()}
             self.log(step_logs)

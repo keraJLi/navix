@@ -2,24 +2,24 @@
 # https://github.com/luchris429/purejaxrl/blob/main/purejaxrl/ppo.py
 # which is in turn inspired by:
 # https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo.py
-from functools import partial
 import time
+from functools import partial
 from typing import Callable, Dict, Tuple
 
 import distrax
 import jax
 import jax.numpy as jnp
-from jax import Array
 import optax
-from flax.training.train_state import TrainState
+import rlax
 from flax import struct
 from flax.linen import FrozenDict as Params
-import rlax
+from flax.training.train_state import TrainState
+from jax import Array
 
-from navix.observations import rgb
 from navix.agents.agent import Agent, HParams
 from navix.environments import Environment
 from navix.environments.environment import Timestep
+from navix.observations import rgb
 from navix.states import State
 
 from .models import ActorCritic
@@ -272,7 +272,7 @@ class PPO(Agent):
             rng=rng,
             epoch=train_state.epoch + self.hparams.num_epochs,
         )
-        logs = jax.tree.map(lambda x: jnp.mean(x), logs)
+        logs = jax.tree_util.tree_map(lambda x: jnp.mean(x), logs)
 
         learning_rate = train_state.opt_state[1].hyperparams["learning_rate"]  # type: ignore
 
@@ -289,7 +289,7 @@ class PPO(Agent):
         if self.hparams.log_render:
             b = jax.random.randint(rng, (), 0, self.hparams.num_envs)
             logs["render/human"] = jax.vmap(rgb)(
-                jax.tree.map(lambda x: x[:, b], experience.state)
+                jax.tree_util.tree_map(lambda x: x[:, b], experience.state)
             ).transpose(
                 (0, 3, 1, 2)
             )  # (T, 3, H, W)

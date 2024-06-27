@@ -21,12 +21,14 @@
 from __future__ import annotations
 
 from typing import Callable, Tuple
-from jax import Array
+
 import jax
 import jax.numpy as jnp
-from .entities import Entities, Ball
-from .states import EventsManager, State
+from jax import Array
+
+from .entities import Ball, Entities
 from .grid import positions_equal, translate
+from .states import EventsManager, State
 
 
 def deterministic_transition(
@@ -92,7 +94,7 @@ def update_balls(state: State) -> State:
         # update events
         # take only the first happened event (even if happened already)
         idx = jnp.where(new_events.ball_hit.happened, size=1)[0][0]  # scalar
-        ball_hits = jax.tree.map(lambda x: x[idx], new_events.ball_hit)
+        ball_hits = jax.tree_util.tree_map(lambda x: x[idx], new_events.ball_hit)
         events = state.events.replace(ball_hit=ball_hits)
         state = state.replace(key=keys[0], events=events)
     return state
